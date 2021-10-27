@@ -185,7 +185,7 @@ I got yet another error, so at this point, I think I am going to restart the pro
 
 I made a new file and retraced my steps, doing everything the same besides my mistakes which is what I will be talking about from here on out, until I catch up to my previous spot.
 Once, I caught up to the partitioning section, I made sure to ensure there were no errors in what I did.
-First, I entered into .dev/sda to create the correct partitions, starting with the EFI system partition.
+First, I entered into /man dev/sda to create the correct partitions, starting with the EFI system partition.
 ## ( fdisk /dev/sda )
 Then, I created a new partition,
 ## ( n )
@@ -302,3 +302,94 @@ Then, I rebooted which gave me a screen asking me to login using myhostname.
 I typed into the login: 
 ## ( root )
 and typed in my password and was logged in successfully.
+Next, I had to do a bunch of post-installation additions starting with adding a Desktop environment. I chose to install budgie which seems like a very nice desktop environment.
+## ( pacman -S budgie-desktop )
+This gave me an immediate error that did not allow me to download, so I looked up a guide to download it, which told me to update Arch Linux and Reboot first, so I did that.
+## ( pacman -Syu )
+which also gives me an error saying invalid url, so I will try to fix this on my own.
+## ( ping archlinux.org )
+which gave me the same error once again.
+I looked up how to resolve this issue and it states that I have an issue with my network configuration, so I looked through the wiki to help.
+I realized that I must have made a mistake by not successfully enabling and configuring systemd-networkd, so I believe I might have to restart this project from scratch another time...
+I will restart and do the exact same thing as I did previously and try to figure out how to setup systemd-networkd successfully, so once I get to that part I will tell you what I did.
+I am up to the internet connection portion of the Arch Install, where this time I wrote down my ip address which was 172.16.34.5.
+I pinged archlinux.org and it worked normally.
+I read deeply through the wiki and found that systemd-networkd automatically works, but I have to setup certain configurations for it such as a symbolic link from systemd to /etc/resolv.conf.
+## ( ln -sf /run/systemd/resolve/stub-resolve/stub-resolve.conf /etc/resolv.conf )
+I also enabled systemd-networkd.
+## ( systemctl enable systemd-networkd )
+I also ran systemd-resolve.service to resolve any other issues for DNS.
+## ( systemctl enable systemd-resolve.service )
+Now I believe my network is correctly configured, so I will continue through my previous steps until I come to another problem.
+Once I got to the network configuration part, I began trying to workout any problems I previously had. I started by making the hostname as before and then troubleshooting how to fix my network configuration.
+I installed dhcpcd.
+## ( pacman -S dhcpcd )
+and ran it using
+## ( dhcpcd )
+This installed a dhcp client and ran it.
+Now, I have to install a dhcp server.
+## ( pacman -S dhcp )
+Next, I ran dhcpd.
+## ( dhcpd )
+which had a weird output, but I will try to figure out what is going on here.
+I moved on to the configuration of the dhcp by following the wiki.
+## ( ip link set up dev end33 )
+## ( ip addr add 139.96.30.100/24 dev ens33 )
+Next, I relocatted a file.
+## ( cp /etc/dhcpd.conf /etc/dhcpd.conf.example )
+After this, I believe everything is correctly configured, but I will check my work just in case.
+I am going to move forward with the install to see if everything works.
+I rebooted and had the exact same error when trying to install a desktop environemnt. I believe I did not correctly organize my mirrors with reflector, so I will restart once again and try to fix this problem.
+I did everything I did previously, I also did again, except I attempted to get the correct mirrorlist, so I can download correctly after the install.
+I started by downloading reflector.
+## ( pacman -S reflector )
+I tried to download the correct mirrorlist using
+## ( reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist )
+which gives me an error saying HTTP Error 403: Forbidden. I looked up what this error means and it says that the url is incorrect which is weird.
+I looked into the file and saw that it actually is updated, but it just had a weird error at the end.
+So, I continued through the same steps I previously did and looked through network configuration once again to ensure everything works correctly.
+After finishing everything besides the reboot and setup, I decided to try to download the desktop environment before rebooting everything because that was the cause of most of my problems previously.
+I installed GNOME desktop environment by first installing xorg.
+## ( pacman -S xorg )
+Then installed gnome.
+## ( pacman -S gnome )
+Hopefully this fixes all of my problems from previous tries, but I will be quite disappointed that I did so much work in network configuration that I did not need to do at all.
+Lastly before the reboot, I enabled the display manager as well as install and enable the system manager.
+## ( pacman -S networkmanager )
+## ( systemctl start gdm.service )
+## ( systemctl enable gdm.service )
+## ( systemctl enable NetworkManager.service )
+I rebooted and everything worked perfectely fine. I am so happy, but I am also extremely pissed that I spent so much time on network configuration even though I now know it did all of this internally.
+Next, I did everything that harvey told me to do having to do with users, sudo permissions, etc.
+First, I opened the terminal and added each username.
+## ( useradd -m steve )
+## ( useradd -m sal )
+## ( useradd -m codi )
+Then added passwords to each with the respective passwords.
+## ( passwd steve )
+## ( passwd sal )
+## ( passwd codi )
+Next, I installed sudo using
+## ( pacman -S sudo )
+I made the group sudo and added sal, codi, and steve to the group.
+## ( groupadd sudo )
+## ( gpasswd -a sal sudo )
+## ( gpasswd -a codi sudo )
+## ( gpasswd -a steve sudo )
+Next, I went into the sudoers file.
+## ( EDITOR=nano visudo )
+and editted out the comment before giving group sudo, sudo permissions.
+I tested this by checking with
+## ( sudo -l -U sal )
+which showed me that they do indeed have permissions.
+I expired sal and codi's password, so they have to change it, once they login.
+## ( passwd --expire sal )
+## ( passwd --expire codi )
+Next, I installed zsh shell.
+## ( pacman -S zsh )
+I installed ssh as well.
+## ( pacman -S openssh )
+I sshed into the class gateway.
+## ( ssh -p 53997 ses3872@129.244.245.21 )
+I color coded the terminal to my liking.
+After that, I quickly made a few aliases and finished my ARCH LINUX INSTALLATION.
